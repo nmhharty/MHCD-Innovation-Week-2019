@@ -1,0 +1,307 @@
+---
+title: "EvalTemplatePDF"
+subtitle: "Subtitle Here"
+author:
+- name: YOUR NAME
+  affiliation: YOUR TITLE
+  email: EMAIL@mhcd.org
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output: 
+  html_document:
+    toc: true
+    css: template.css
+---
+<!-- The section above is called a YAML header
+It includes "title page" info like the title, subtitle, and author contact. This is also the output format is chosen. You can choose to leave all three outputs or just one (by deleting the others)
+toc = 2 means that the  Table of Contents will list headings 2 levels deep, and can be edited if you want to show more or fewer.-->
+
+<!--The code chunk below (notice the gray box) is the setup code. You load your libraries, the source file (an R script where you've already done most of your data cleaning and prep)-->
+
+<!--NOTE: Any comments in ALL CAPS within code are helper guidance added into this example report and would not be included in your file-->
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, qwraps2_markup = "markdown")
+library(tidyverse)
+library(likert)
+library(lubridate)
+library(kableExtra)
+
+
+#SET FISCAL YEAR FOR REPORT, OTHER PARAMETERS YOU CREATED IN THE SOURCE SCRIPT
+#Create FY variables here, to automatically update data year
+FY <- "FY19"
+FYstart <- "July 1, 2018"
+FYend <- "June 30, 2019"
+
+
+DECA <- read.csv('DECA_7.16.19.csv', header = TRUE)
+DECAanalysis <- DECA %>%
+  select(SiteName, RatingYear, ChildId, RaterType, RatingPeriod, TpfRaw, TpfDescription) %>%
+  filter(RatingYear=='2018-2019', SiteName %in% c('Lowry', 'Sun Valley', 'Rude Park', 'DCCA', 'Edna Oliver'),
+         RatingPeriod %in% c('P', 'T'))
+
+DECAraw <- DECAanalysis %>%
+  select(-TpfDescription) %>%
+  spread(RatingPeriod, TpfRaw)
+
+DECAraw$Change <- DECAraw$`T`-DECAraw$P
+DECAraw$ChangeCat <- if_else(DECAraw$Change>0,'Positive', 
+                             if_else(DECAraw$Change<0,'Negative','No Change'))
+
+DECAcat <- DECAanalysis %>%
+  select(-TpfRaw) %>%
+  spread(RatingPeriod, TpfDescription)
+```
+
+#Executive Summary
+ADD TEXT HERE WHEN ALL ANALYSIS COMPLETE
+
+#Program Description
+The Play Project strives to facilitate healthy social-emotional development of young 
+children through early childhood consultation (ECMHC) embedded in early learning centers 
+in the Denver metro area. Masters-level consultants offer evidence-based approaches to 
+facilitate social-emotional development, healthy relationships between children and adults, 
+and positive mental health behaviors in the classroom. These consultation services help 
+identify and remove obstacles to quality care while promoting sensitive and responsive 
+interactions between vulnerable young children and the adults who care for them by improving 
+the relationships between program directors, staff, parents, children and mental health 
+consultants. 
+
+The Mental Health Center of Denver (MHCD) has implemented the Play Program 
+since 2011. Since that time, the program has grown to include 5 consultants embedded within 
+5 of Denver’s early childhood centers and 2 consultants avaialble “on call” to any early 
+childhood center in Denver. The overarching goal of the program has been to facilitate 
+relationships and structure early learning environments that will inspire, support, and 
+maintain the mental health of young children. To support this goal, MHCD employs an 
+evidence-based model to improve children’s social-emotional well-being by training early 
+childhood center teachers and staff in early childhood mental health best practices, 
+provide mental health consultation to early childhood teachers, and educate parents about 
+early childhood mental health.
+
+The current funding has helped MHCD expand their ECMHC program to partner with early learning 
+centers serving foster care and high-need children. Program staff have identified this priority 
+population because of the special needs of this group of children, families, and early learning 
+centers. The Piton Foundation funding is supporting 3 consultants embedded within three centers 
+for at least 4 days per week.
+
+Teachers and parents are trained throughout the year to help them manage behavioral challenges, 
+stress levels, and other concerns they may have. Education is provided on issues related to 
+trauma, social and emotional development, and early childhood mental health. Adults are also 
+provided the opportunity to reflect on their work, their relationships with children and other 
+adults, and their own personal triggers. These services are vital to young children’s well-being 
+as early interventions may lead to earlier identification of coping strategies, thereby limiting 
+the time these children have concerning behaviors. Early mental health consultation could also 
+help them to learn how to manage these issues at an earlier age in the event that they need to 
+re-address them at a later point in their lives. Additionally, the majority of families from the 
+centers where services were provided utilize the Colorado Child Care Assistance Program for low-
+income families. Consultation helps promote healthy relationships which can buffer children from 
+the stress associated with poverty, trauma, and other challenges facing their families.
+
+<!--the paragraph below includes a bulleted list with bolded text-->
+The Play Project provides two tiers of services to participating centers:  
+
+* *Center-based* services offered by the Play Project Project involve consultation to directors 
+and early childhood providers regarding strategies to promote healthy social and emotional 
+development, address behavioral challenges, improve the classroom environment, and improve overall 
+quality. Center-based activities also include education programs for parents, children, and/or 
+providers.  
+* *Child-specific* services offered by the Play Project include direct involvement with individual 
+ children, parents, and teachers. These interactions focus on building strengths and protective 
+factors for both children and adults, reducing challenging behaviors, and encouraging social-
+emotional competence. Consultants also work with children and parents in group settings. Referrals 
+for evaluation and treatment of mental health and developmental issues occur through these 
+individual and group contacts.  
+
+Consultants spend up to four days per week at each center to provide resources to address children’s 
+social and emotional health and development. The following are resources given to promote this development:  
+
+   *  *Supportive Programs for Directors, Teachers, and Early Childhood Staff* including classroom support 
+and consultation, reflection, coaching, mentoring, modeling interventions, professional training, and staff 
+development.  
+   *  *Supportive Services for Children* including active referrals to community resources (i.e. mental health 
+and early intervention services), assessment of children’s emotional well-being using the Devereaux Early 
+Childhood Assessment (DECA), one-on-one support, and positive skill building to promote school readiness 
+and prepare for educational success.  
+   * *Supportive Programs for Parents including parent* support and education, individual or family meetings, 
+home visits, resources and referrals for families, empowerment, and self-advocacy.
+
+<!--The paragraph below includes IN LINE r code to automatically insert the current fiscal year start and end dates based upon the dates set in the setup code chuck at the beginning of the report, just below the YAML header. Notice the BACK TICKS that surround the code. The format `r ` is used for all inline code. The code you write to pull a specific number is then added after the "r" and before the closing back tick. The two asterisks (**) that surround the inline code is used to bold the results of this code.-->
+The data included in this report evaluates the work of the Play Project from **`r FYstart`** to **`r FYend`**. 
+A separate, comprehensive, multi-year report will evaluate the entirety of the Play Project’s work related to 
+this funding (August 1, 2016 through July 31, 2020).
+
+#Evalaution Approach
+<!--The text of this Evaluation Approach sections is intentionally lacking. You will add more details as relevant to your project.-->
+The PLAY team has identified four questions to guide their evaluation efforts:
+
+* How does embedded, center-based and classroom specific consultation impact early learning center staff?
+* Are parent and teacher-specific trainings provided by consultants well-received?
+* To what extent are children's social-emotional assessment scores changing over the course of a school year?
+The evaluation metrics outlined within the Evaluation Plan Table are intended to provide a comprehensive story of PLAY’s services to provide an answer to each these three evaluation questions. Data is collected through both regular organizational workflows as well as workflows and data entry specific to this program. Data reporting and analysis systems are set up to report on all routinely updated indicators. Data analysis is overseen by the PLAY Evaluator and is completed by the Applied Research Team.
+
+The PLAY project team developed a logic model to guide its evaluation efforts. ... 
+
+#Process Measures
+Process evaluation of the Play Project included measuring the following outputs:
+
+1. Total number of consultation and education services provided by consultants  
+2. Total number of teachers receiving ECMH trainings  
+3. The number of staff responding to consultation satisfaction survey  
+4. Total number of parents receiving ECMH trainings  
+5. Total number of children for whom a DECA was completed  
+6. Counts of most common consultation topics and activities  
+7. Counts of trainings by training topic/category  
+
+<!--Lines 146 through 177 include a bunch of code to insert numbers into this sentence. The final sentence reads: From July 1, 2018 through June 30, 2019, consultants on the Play Project provided 23,775 consultation and education services, trained 129 teachers and 44 parents, completed 259 DECA assessments, and surveyed NO SURVEYS COMPLETED staff on consultation satisfaction. Consultants provided 117 teacher trainings on 3 topics to improve their management skills within their classrooms, increase their understanding of social and emotional development, and reflect on their work.
+Each number inserted into the sentence is bolded, so you see sections of code offset by two asterisks (**). The first section (lines 147-151) is summarizing C&E data from the CE data frame. It's filtering to just the current GrantYear (notice the GrantYear==FY is dynamic - we set "FY" in the setup code chunk to be "FY19" so this code is going to pull FY19. Then, it filters to just specific staff. Finally, it summarises to get the sum of the number of people who recevied a C&E service (sum(CENumberofRecipients)) and is formatted to put a comma in if the number is more than 3 digits (big.mark=",").-->
+From *`r FYstart`* through *`r FYend`*, consultants on the Play Project provided 
+
+consultation and education services, trained 
+
+teachers and 
+
+parents, completed 
+
+DECA assessments, and surveyed 
+NO SURVEYS COMPLETED
+staff on consultation satisfaction. Consultants provided 
+
+teacher trainings on
+
+topics to improve their management skills within their classrooms, increase their understanding of 
+social and emotional development, and reflect on their work. A listing of topics and total participants is 
+provided in **Table 1** below.  
+<!--The code chunk below creates a table of the number of teachers trained by training topic and early learning center. It will not display the code alongside the results in the final document (echo = FALSE). It will print the results (results = 'asis'). The kable wrapper around the code formats the table using the KableExtras package and makes it pretty including giving it a caption. This caption is automatically labeled as "Table __." in the output, auto-generating the number based upon how many previous code chunks created a table. This will be Table 1.-->
+
+
+#Outcome Measures
+Outcome evaluation of the Play Project included measuring the following outputs: 
+
+1.	Teacher satisfaction with trainings
+2.	Parent satisfaction with trainings
+3.	Early learning center staff satisfaction with consultation services
+4.	Results of DECA
+5.	Academic year changes in DECA
+
+
+## Satisfaction Surveys
+Feedback from teachers and parents demonstrated that most felt positively about the training they received. <!--The next two bits of inline code use the scales package and its percent function to cleanly format the result of mean(TeacherResponseAgree$Proportion) as a percentage to the tenths place.-->
+ of teachers and 
+ of parents reported that they 
+*strongly agreed or agreed* with statements in the class evaluation related to the *presenter's style* and *preparation* as well 
+as *content knowledge gained*. <!--This next sentence includes two references to appendices. The resulting file will have links that will jump to each appendix. The text that will show in the final document is "Appendix 2" and "3". The brackets go around the text that you want hyperlinked and the reference name for the appendix (or header, or whatever you're referencing/linking) foes in parentheses. Hop down to line 367 to see how to name the appendices so they can be referenced in the report.-->The full class evaluations are available in [Appendix 2](#Full-Teacher-Eval) 
+and [3](#Full-Parent-Eval). Teachers and parents provided input on why they liked the trainings in which they participated. Themes from 
+teachers' comments include a *comfortable environment*, *positive perspectives of the instructors*, and *expansion on teacher skills*. 
+Finally, training participants provided suggestions for improvement. These suggestions on *increasing the time and consistency spent 
+learning these topics*, as well as *increasing the content* within the trainings for teachers. Parents suggested *improving the class 
+environment* and *providing more breaks*.
+
+<!--ADD A SECTION THAT CREATES A TABLE OR SOMETHING HERE-->
+
+
+## DECA Results  
+The Devereaux Early Childhood Assessment (DECA) is used to evaluate the social-emotional development among children. This instrument is 
+administered to teachers at the beginning and end of the school year to evaluate their students’ changes in social-emotional development 
+over the course of the school year. The DECA utilizes three scales that are then aggregated to a composite score:  
+
+* *Attachment/Relationships Scale* assesses the relationship between the child and significant adults.  
+* *Initiative Scale* assesses the child’s ability to use independent thought and action to meet his or her needs.
+* *Self-Regulation Scale* assesses the child’s ability to manage and gain control of emotion and sustain focus and attention.
+* *Total Protective Factor Scale* is a composite of attachment/relationships, initiative, and self-regulation scales to indicate overall 
+protective strength.
+
+The DECA was administered <!--The section below works just like lines 146-177 to insert numbers into a sentence. The dplyr is a little more elaborate. The first one (lines 225-227) grabs the DECA data frame, filters to just the 2018-2019 rating year (a value in the RatingYear column) AND filters to get results for SiteNames that include any of those listed. Then, it summarises the results by getting the count of all these results and the format() wrapper formats the result to have a comma for a result greater than 3 digits.-->
+**`r format(DECA %>% 
+      filter(RatingYear=='2018-2019', SiteName %in% c('Lowry', 'Sun Valley', 'Rude Park', 'DCCA', 'Edna Oliver')) %>%
+      summarise(Freq = n()),big.mark=",",trim=TRUE)`**
+times to
+**`r format(DECA %>% 
+           filter(RatingYear=='2018-2019', SiteName %in% c('Lowry', 'Sun Valley', 'Rude Park', 'DCCA', 'Edna Oliver')) %>%
+           summarise(n_distinct(ChildId)),big.mark=",",trim=TRUE)`**
+unique children. There were <!--this next one is a little different. It's creating a new dataframe (DECAprepost) by counting the number of ChildIds in the DECA analysis dataframe; then it grabs the cell in column 2, row 2 to return as a result inline.-->
+**`r DECAprepost <- DECAanalysis %>% 
+           count(ChildId) %>%
+           count(n)
+DECAprepost[2,2]`** 
+children evaluated at both the beginning and end of the year. Data reported only include those **`r DECAprepost[2,2]`** students with 
+scores at the beginning of the year and at the end in order to accurately analyze changes occurring between these time periods. Data 
+from these figures were obtained from teacher scorings using the e-DECA 2.0. The DECA Total Protective Factor Score combines the scores 
+of the Attachment and Relationship, Initiative, and Self-Regulation categories. **Figure 1** demonstrates differences in scores between 
+the beginning of the year and the end of the year. Most of the scores had improved during this time period (`r scales::percent(DECAraw %>%
+    drop_na() %>%
+    group_by(ChangeCat) %>%
+    summarise (n = n()) %>%
+    mutate(freq = n / sum(n)) %>%
+    filter(ChangeCat=='Positive') %>%
+    select(freq) %>%
+    sum())
+`
+), but quite a few had decreased or stayed the same (`r scales::percent(DECAraw %>%
+                          drop_na() %>%
+                          group_by(ChangeCat) %>%
+                          summarise (n = n()) %>%
+                          mutate(freq = n / sum(n)) %>%
+                          filter(ChangeCat=='Negative'|ChangeCat=='No Change') %>%
+                          select(freq) %>%
+                          sum())
+`). <!--There's a lot going on in the two pieces of code above. The first one is getting a percentage of people whose scores improved. The scales::percent wrapper is formatting the percentage as in the example in line 200. Then, reading from the beginning, it's grabbing the DECAraw dataframe, dropping NAs, then grouping by ChangeCat column, summarizing as count of rows for each ChangeCat, then creating a new column (the mutate function) that is a proportion of rows in each ChangeCat divided by the total number of rows; finally, filtering to only those with a positive ChangeCat and selecting the result to print. (functionally, the scales::percent wrapper function happens last)-->
+
+<!--The code chunk below creates a bar chart using the ggplot2 package. The code between the curly brackets ({ }) says not to display the code when running and showing the result of the code, gives a figure caption, and sets the figure width and position. The ggolot code is grabbing the DECAraw dataframe, dropping NAs, then plotting. Describing the sections between plus signs (+) separately: ggplot() creates a ggplot graph with SiteName on the x axis and ChangeCat as the variable used to calculate counts/height for the bars, and removing NA values. geom_bar() says the plot should be a bar chat and that it's a histogram. scale_fill_brewer() changes the colors of the bars to use the "Blues" palette (look up ColorBrewer for more details and options). theme() sets styling for the graph by removing the x axis title, creating a y-axis label ("Proportion"), and adding a title. guides() updates the legend to reverse the color order-->
+```{r echo = FALSE, fig.cap = "Changes in DECA Total Protective Factor Scores", fig.width=6.25, fig.pos='H'} 
+library(ggplot2)
+DECAraw %>%
+  drop_na() %>%
+  ggplot(aes(x=SiteName, fill=ChangeCat, na.rm=FALSE)) + geom_bar(position = "fill") + scale_fill_brewer(palette = "Blues", name = "Change Category") +
+    theme(axis.title.x = element_blank()) + labs(y="Proportion", title = "Positive DECA Pre/Post Change for Two of Three Centers") + 
+    guides(fill = guide_legend(reverse=TRUE))
+```
+Although the overall change was mostly positive, we do not know if the change is statistically significant. If the resulting 
+differences are significant, this means the improvements made during this time are likely not random. This could suggest a causal relationship 
+between the intervention and the outcomes measured. For the purposes of this project, statistical significance would mean that the positive
+differences in children’s social and emotional growth may be due to the Play consultants' coaching. To examine the extent of these 
+differences, a two-tailed, paired t test was conducted.
+<!--this code chunk is to prep DECA data for running t-tests. It does not display results, and does not include the chunk in the final output. It creates a new dataframe (DECAanalysis) from the DECAraw dataframe by reshaping the DECAraw file into long form from wide form. It also orders ("arranges") the DECAraw file by ChildId before creating a dataframe with ttest results (DECAttest). Finally, it runs some descriptive statistics on the DECAraw data-->
+``` {r, label = DECAlongform, echo = FALSE, include = FALSE}
+DECAanalysis2 <- DECAraw %>%
+  gather(RatingTime, Score, P, `T`) %>%
+  arrange(ChildId, RatingTime)
+
+DECAraw <- DECAraw %>%
+  arrange(ChildId)
+DECAttest <- t.test(DECAraw$P, DECAraw$`T`, paired=TRUE)
+library(psych)
+describe(DECAraw$P, na.rm = TRUE)
+describe(DECAraw$T)
+```
+The t test compares mean Total Protective Factor (TPF) scores obtained at the beginning of the year to those at the end in order to see if they are 
+statistically different from each other. We have included this test as it can help determine if the scores obtained after the Play Project intervention 
+were significantly higher than those prior to the intervention. There were statistically significant differences in TPF scores for the beginning of 
+the year (M=139.1, SD=34.3) and the end of the year (M=143.3, SD=31.5); t(`r format(round(DECAttest$statistic, 2), nsmall = 2)`, 
+`r format(round(DECAttest$p.value, 4), nsmall = 2)`). <!--these two snippets are similar to things included previously, but they're rounding the results to 2 and 4 decimal places, respectively-->
+
+The p-value from this test was less than the significance level of 0.05; therefore, there is a true differences between these pre- and post-TPF DECA 
+scores. Table 4 explores the categories of Initiative, Self-Regulation, and Attachment and Relationship. The average pre- and post-scores for students 
+in each of these categories are shown, where these scores are then classified into three types. “Strength” indicates that the average score for this 
+category is high and the students demonstrate strength in this category. “Typical” refers to a score that is typical for these students. Lastly, the 
+classification of “need” means that students’ scores are lower than average and require improvement. 
+
+Table 4 shows that across all categories, we see improvements from pre- and post- time points. Fewer students had “need” and “typical” scores while 
+more had “strength” and “typical” scores at the end of the year. The greatest positive changes from pre to post occurred in the Initiative and Attachment and 
+Relationships categories. There was a 6.1% decrease in the number of children categorized in the "need" group for Initiative and a 8.3% decrease in the number
+of children categorized in the "need" group for Attachment and Relationships. Table 4 shows the breakdown of mean score, and distribution 
+of the children among the categories, both pre and post.  
+
+Taken together the results of these data further support the use of the Play Project in early childhood centers. We see small, statistically significant 
+positive change in DECA scores of children served by the Play Project. However, we see that there were differences by early learning center. We plan to 
+investigate this further as we prepare for the next school year.  Overall the surveys of the teachers and parents showed strong support for the trainings, 
+with most of the teachers having responded that they felt more effective and confident because of the consultation and with many responding that without 
+the consultation they and their children may no longer be in the program. Thus, these positive results may extend past educators and be in part due to 
+the support provided by the consultants in the classroom.
+
+# Impact
+Impact evaluation of the Play Project included measuring the following outputs:  
+
+1. Teacher satisfaction with trainings
+2. Themes from consultants' Success Narratives
+
+There were no consultation satisfaction surveys completed in `r FY` so that data is not included in this year's report. We will include this data next year. Our second key measure of imapct is in identifying themes in consultants' success narratives. The themes from this year are displayed in the word cloud below. <!--the code chunk below creates a word cloud from a text file that is read in.-->
